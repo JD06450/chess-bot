@@ -1,0 +1,8 @@
+stockfish
+debug*
+build
+.vscode
+.venv
+.cache
+*.py
+*.sh

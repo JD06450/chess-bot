@@ -1,0 +1,71 @@
+BasedOnStyle: Gnu
+ColumnLimit: 120
+
+UseTab: ForIndentation
+TabWidth: 4
+IndentWidth: 4
+IndentAccessModifiers: false
+IndentCaseBlocks: true
+IndentWrappedFunctionNames: true
+
+AccessModifierOffset: -4
+
+AlignConsecutiveAssignments:
+  Enabled: true
+  AcrossEmptyLines: false
+  AcrossComments: true
+  AlignCompound: true
+AlignConsecutiveBitFields: AcrossComments
+AlignConsecutiveDeclarations: AcrossComments
+AlignConsecutiveShortCaseStatements:
+  Enabled: true
+  AcrossEmptyLines: true
+  AcrossComments: true
+  AlignCaseColons: false
+
+AlignAfterOpenBracket: Align
+AlignArrayOfStructures: Left
+AlignEscapedNewlines: LeftWithLastLine
+
+AllowAllArgumentsOnNextLine: false
+AllowAllParametersOfDeclarationOnNextLine: false
+AllowShortBlocksOnASingleLine: true
+AllowShortCaseExpressionOnASingleLine: true
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortCompoundRequirementOnASingleLine: true
+AllowShortEnumsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: All
+AllowShortIfStatementsOnASingleLine: AllIfsAndElse
+AllowShortLambdasOnASingleLine: All
+AllowShortLoopsOnASingleLine: true
+AllowShortNamespacesOnASingleLine: true
+
+BinPackArguments: false
+BinPackParameters: OnePerLine
+
+BreakAfterReturnType: Automatic
+BreakBeforeBraces: Allman
+# BreakBinaryOperations: OnePerLine
+BreakConstructorInitializers: AfterColon
+BreakTemplateDeclarations: Yes
+
+PointerAlignment: Right
+ReferenceAlignment: Right
+IntegerLiteralSeparator:
+  Binary: 8
+  Decimal: 3
+  Hex: -1
+  DecimalMinDigits: 5
+
+MainIncludeChar: Quote
+
+SpaceAfterCStyleCast: true
+SpaceBeforeParens: Custom
+SpaceBeforeParensOptions:
+  AfterControlStatements: true
+  AfterFunctionDeclarationName: false
+  AfterFunctionDefinitionName: false
+
+PenaltyReturnTypeOnItsOwnLine: 10000000
+PenaltyBreakAssignment: 100
+# PenaltyExcessCharacter: 50
