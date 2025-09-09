@@ -43,17 +43,7 @@ public:
 	constexpr bool any() const noexcept { return bits != 0; }
 	constexpr bool none() const noexcept { return bits == 0; }
 
-	constexpr size_t count() const noexcept
-	{
-		size_t        count     = 0;
-		std::uint64_t temp_bits = bits;
-		for (auto idx = std::countr_zero(temp_bits); idx < 64; idx = std::countr_zero(temp_bits))
-		{
-			count++;
-			temp_bits ^= 1ULL << idx;
-		}
-		return count;
-	}
+	constexpr size_t count() const noexcept { return std::popcount(bits); }
 
 	constexpr bitboard &operator&=(const bitboard &rhs) noexcept { bits &= rhs.bits; return *this; }
 	constexpr bitboard &operator|=(const bitboard &rhs) noexcept { bits |= rhs.bits; return *this; }
