@@ -15,7 +15,6 @@ class Board;
 
 namespace bitboard
 {
-// typedef std::uint64_t bitboard;
 
 class bitboard
 {
@@ -95,7 +94,7 @@ struct threat_line
 	bool     is_check;
 };
 
-struct piece_boards
+struct pieces
 {
 	bitboard pawns;
 	bitboard knights;
@@ -110,14 +109,14 @@ struct piece_boards
 
 	void calculate_combined() { all_pieces = pawns | knights | bishops | rooks | queens | kings; }
 
-	bool operator==(const piece_boards &rhs)
+	bool operator==(const pieces &rhs)
 	{
 		return this->pawns == rhs.pawns && this->knights == rhs.knights && this->bishops == rhs.bishops
 		       && this->rooks == rhs.rooks && this->queens == rhs.queens && this->kings == rhs.kings
 		       && this->all_pieces == rhs.all_pieces && this->visible == rhs.visible;
 	}
 
-	bool operator!=(const piece_boards &rhs)
+	bool operator!=(const pieces &rhs)
 	{
 		return this->pawns != rhs.pawns || this->knights != rhs.knights || this->bishops != rhs.bishops
 		       || this->rooks != rhs.rooks || this->queens != rhs.queens || this->kings != rhs.kings
@@ -125,7 +124,7 @@ struct piece_boards
 	}
 };
 
-struct bb_list
+struct list
 {
 	std::vector<bitboard> boards{};
 	bitboard              combined;
@@ -135,9 +134,9 @@ struct bb_list
 		combined = std::reduce(boards.begin(), boards.end(), bitboard(0), std::bit_or<bitboard>());
 	}
 
-	bool operator==(const bb_list rhs) { return this->boards == rhs.boards && this->combined == rhs.combined; }
+	bool operator==(const list &rhs) { return this->boards == rhs.boards && this->combined == rhs.combined; }
 
-	bool operator!=(const bb_list rhs) { return this->boards != rhs.boards || this->combined != rhs.combined; }
+	bool operator!=(const list &rhs) { return this->boards != rhs.boards || this->combined != rhs.combined; }
 };
 
 // The king can be attacked from a total of 16 sides: 8 cardinal directions, and the 8 knight moves.
@@ -147,8 +146,8 @@ struct bb_list
 
 struct threat_boards
 {
-	bb_list checks;
-	bb_list pins;
+	list checks;
+	list pins;
 
 	threat_boards()
 	{
@@ -162,7 +161,7 @@ struct threat_boards
 
 struct single_set
 {
-	piece_boards  pieces;
+	pieces        pieces;
 	threat_boards threats;
 
 	bool operator==(const single_set &rhs) { return this->pieces == rhs.pieces && this->threats == rhs.threats; }
@@ -178,12 +177,13 @@ struct full_set
 	bool operator!=(const full_set &rhs) { return this->white != rhs.white || this->black != rhs.black; }
 };
 
-// bitboard generate_pawn_board(const Board &state, Color color);
-// bitboard generate_knight_board(const Board &state, Color color);
-// bitboard generate_bishop_board(const Board &state, Color color);
-// bitboard generate_rook_board(const Board &state, Color color);
-// bitboard generate_queen_board(const Board &state, Color color);
-// bitboard generate_king_board(const Board &state, Color color);
+bitboard generate_pawn_board(const Board &state, Color color);
+bitboard generate_knight_board(const Board &state, Color color);
+bitboard generate_bishop_board(const Board &state, Color color);
+bitboard generate_rook_board(const Board &state, Color color);
+bitboard generate_queen_board(const Board &state, Color color);
+bitboard generate_king_board(const Board &state, Color color);
+pieces   generate_piece_board(const Board &state, Color color);
 
 // bitboard generate_pawn_visibility(const Board &state, const Piece &pawn);
 // bitboard generate_knight_visibility(const Piece &knight);
@@ -192,7 +192,7 @@ struct full_set
 // bitboard generate_queen_visibility(const Board &state, const Piece &queen);
 // bitboard generate_king_visibility(const Board &state, const Piece &king);
 
-bitboard generate_piece_visibility(const Board &state, Color color, const full_set &old_boards);
+bitboard generate_piece_visibility(const piece_set_t &piece_set, Color color, const full_set &old_boards);
 
 threat_line generate_threat_line(const Piece    &piece,
                                  bitboard        all_pieces,
@@ -203,8 +203,8 @@ threat_line generate_threat_line(const Piece    &piece,
 
 threat_boards generate_threat_lines(const Board &state, Color color, const full_set &old_boards);
 
-single_set generate_bitboard_set(const Board &state, Color color);
-full_set   generate_bitboard_full_set(const Board &state);
+single_set generate_single_set(const Board &state, Color color);
+full_set   generate_full_set(const Board &state);
 
 std::string to_string(bitboard bb);
 

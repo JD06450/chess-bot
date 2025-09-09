@@ -67,11 +67,11 @@ bitboard generate_king_board(const Board &state, Color color)
 	return board;
 }
 
-piece_boards generate_piece_board(const Board &state, Color color)
+pieces generate_piece_board(const Board &state, Color color)
 {
-	piece_boards pieces = { generate_pawn_board(state, color),   generate_knight_board(state, color),
-		                    generate_bishop_board(state, color), generate_rook_board(state, color),
-		                    generate_queen_board(state, color),  generate_king_board(state, color) };
+	pieces pieces = { generate_pawn_board(state, color),   generate_knight_board(state, color),
+		              generate_bishop_board(state, color), generate_rook_board(state, color),
+		              generate_queen_board(state, color),  generate_king_board(state, color) };
 	pieces.calculate_combined();
 	return pieces;
 }
@@ -80,15 +80,14 @@ piece_boards generate_piece_board(const Board &state, Color color)
 
 #pragma region Piece_Visibility
 
-bitboard generate_pawn_visibility(const Board &state, const Piece &pawn)
+bitboard generate_pawn_visibility(const Piece &pawn)
 {
 	return pawn == Color::WHITE ? WHITE_PAWN_CAPTURES[pawn.position()] : BLACK_PAWN_CAPTURES[pawn.position()];
 }
 
 bitboard generate_knight_visibility(const Piece &knight) { return KNIGHT_MOVES[knight.position()]; }
 
-bitboard generate_visibility_on_line(const Board    &state,
-                                     const Piece    &piece,
+bitboard generate_visibility_on_line(const Piece    &piece,
                                      DirectionOffset direction,
                                      size_t          max_steps,
                                      bitboard        break_board)
@@ -111,43 +110,43 @@ bitboard generate_visibility_on_line(const Board    &state,
 	return moves;
 }
 
-bitboard generate_bishop_visibility(const Board &state, const Piece &bishop, bitboard break_board)
+bitboard generate_bishop_visibility(const Piece &bishop, bitboard break_board)
 {
 	bitboard moves(0);
 
 	const std::array<size_t, 8> &squares_to_edge = NUM_SQUARES_TO_EDGE[bishop.position()];
 
 	for (size_t i = 4; i < 8; i++)
-		moves |= generate_visibility_on_line(state, bishop, DIRECTION_OFFSETS[i], squares_to_edge[i], break_board);
+		moves |= generate_visibility_on_line(bishop, DIRECTION_OFFSETS[i], squares_to_edge[i], break_board);
 
 	return moves;
 }
 
-bitboard generate_rook_visibility(const Board &state, const Piece &rook, bitboard break_board)
+bitboard generate_rook_visibility(const Piece &rook, bitboard break_board)
 {
 	bitboard moves(0);
 
 	const std::array<size_t, 8> &squares_to_edge = NUM_SQUARES_TO_EDGE.at(rook.position());
 
 	for (size_t i = 0; i < 4; i++)
-		moves |= generate_visibility_on_line(state, rook, DIRECTION_OFFSETS[i], squares_to_edge[i], break_board);
+		moves |= generate_visibility_on_line(rook, DIRECTION_OFFSETS[i], squares_to_edge[i], break_board);
 
 	return moves;
 }
 
-bitboard generate_queen_visibility(const Board &state, const Piece &queen, bitboard break_board)
+bitboard generate_queen_visibility(const Piece &queen, bitboard break_board)
 {
 	bitboard moves(0);
 
 	const std::array<size_t, 8> &squares_to_edge = NUM_SQUARES_TO_EDGE.at(queen.position());
 
 	for (size_t i = 0; i < 8; i++)
-		moves |= generate_visibility_on_line(state, queen, DIRECTION_OFFSETS[i], squares_to_edge[i], break_board);
+		moves |= generate_visibility_on_line(queen, DIRECTION_OFFSETS[i], squares_to_edge[i], break_board);
 
 	return moves;
 }
 
-bitboard generate_king_visibility(const Board &state, const Piece &king)
+bitboard generate_king_visibility(const Piece &king)
 {
 	bitboard moves(0);
 
@@ -162,32 +161,30 @@ bitboard generate_king_visibility(const Board &state, const Piece &king)
 	return moves;
 }
 
-bitboard generate_piece_visibility(const Board &state, Color color, const full_set &old_boards)
+bitboard generate_piece_visibility(const piece_set_t &piece_set, Color color, const full_set &old_boards)
 {
-	const piece_set_t &piece_set = color == Color::WHITE ? state.white_pieces : state.black_pieces;
+	// const piece_set_t &piece_set = color == Color::WHITE ? state.white_pieces : state.black_pieces;
 
-	const piece_boards &set       = color == Color::WHITE ? old_boards.white.pieces : old_boards.black.pieces;
-	const piece_boards &other_set = color == Color::WHITE ? old_boards.black.pieces : old_boards.white.pieces;
+	const pieces &our_bb_set   = color == Color::WHITE ? old_boards.white.pieces : old_boards.black.pieces;
+	const pieces &enemy_bb_set = color == Color::WHITE ? old_boards.black.pieces : old_boards.white.pieces;
 
-	bitboard break_board = (set.all_pieces | other_set.all_pieces) & ~other_set.kings;
-
-	bitboard visibility = generate_king_visibility(state, piece_set.kings.front());
-	size_t   i;
+	bitboard break_board = (our_bb_set.all_pieces | enemy_bb_set.all_pieces) & ~enemy_bb_set.kings;
+	bitboard visibility  = generate_king_visibility(piece_set.kings.front());
 
 	for (auto &queen : piece_set.queens)
 	{
 		assert(queen.get_type() == PieceType::QUEEN && "Piece type mismatch in queen piece set.");
-		visibility |= generate_queen_visibility(state, queen, break_board);
+		visibility |= generate_queen_visibility(queen, break_board);
 	}
 	for (auto &rook : piece_set.rooks)
 	{
 		assert(rook.get_type() == PieceType::ROOK && "Piece type mismatch in rook piece set.");
-		visibility |= generate_rook_visibility(state, rook, break_board);
+		visibility |= generate_rook_visibility(rook, break_board);
 	}
 	for (auto &bishop : piece_set.bishops)
 	{
 		assert(bishop.get_type() == PieceType::BISHOP && "Piece type mismatch in bishop piece set.");
-		visibility |= generate_bishop_visibility(state, bishop, break_board);
+		visibility |= generate_bishop_visibility(bishop, break_board);
 	}
 	for (auto &knight : piece_set.knights)
 	{
@@ -197,7 +194,7 @@ bitboard generate_piece_visibility(const Board &state, Color color, const full_s
 	for (auto &pawn : piece_set.pawns)
 	{
 		assert(pawn.get_type() == PieceType::PAWN && "Piece type mismatch in pawn piece set.");
-		visibility |= generate_pawn_visibility(state, pawn);
+		visibility |= generate_pawn_visibility(pawn);
 	}
 
 	return visibility;
@@ -207,34 +204,18 @@ bitboard generate_piece_visibility(const Board &state, Color color, const full_s
 
 #pragma region Checks
 
-void generate_checks_for_pawn(const Piece &pawn, const Piece &enemy_king, threat_boards &limiters)
+void generate_checks_for_pawn(const Piece &pawn, const Piece &enemy_king, threat_boards &threats)
 {
-	// int from_file = get_file_from_square(pawn.position());
-
-	// DirectionOffset left_offset  = pawn.get_color() == Color::WHITE ? DirectionOffset::UP_LEFT
-	//                                                                 : DirectionOffset::DOWN_LEFT;
-	// DirectionOffset right_offset = pawn.get_color() == Color::WHITE ? DirectionOffset::UP_RIGHT
-	//                                                                 : DirectionOffset::DOWN_RIGHT;
-
-	// int left_to  = pawn.position() + (int) left_offset;
-	// int right_to = pawn.position() + (int) right_offset;
-
 	bitboard captures = pawn.get_color() == Color::WHITE ? WHITE_PAWN_CAPTURES[pawn.position()]
 	                                                     : BLACK_PAWN_CAPTURES[pawn.position()];
-	// captures &= 1ULL << enemy_king.position();
 
-	// bool left_valid  = left_to == enemy_king.position() && from_file != 0;
-	// bool right_valid = right_to == enemy_king.position() && from_file != 7;
-	// if (!left_valid && !right_valid) return;
-
-	if (captures.test(enemy_king.position())) limiters.checks.boards.push_back(bitboard(1ULL << pawn.position()));
+	if (captures.test(enemy_king.position())) threats.checks.boards.push_back(bitboard(1ULL << pawn.position()));
 }
 
-void generate_checks_for_knight(const Piece &knight, const Piece &enemy_king, threat_boards &limiters)
+void generate_checks_for_knight(const Piece &knight, const Piece &enemy_king, threat_boards &threats)
 {
-	bitboard moves = KNIGHT_MOVES[knight.position()];
-
-	if (moves.test(enemy_king.position())) limiters.checks.boards.push_back(bitboard(1ULL << knight.position()));
+	if (KNIGHT_MOVES[knight.position()].test(enemy_king.position()))
+		threats.checks.boards.push_back(bitboard(1ULL << knight.position()));
 }
 
 // Returns `true` if the line is a check, and `false` when it's a pin.
@@ -276,8 +257,7 @@ threat_line generate_threat_line(const Piece    &piece,
 	return threat_line{ 0, false };
 }
 
-void generate_threats_for_bishop(const Board   &state,
-                                 const Piece   &bishop,
+void generate_threats_for_bishop(const Piece   &bishop,
                                  bitboard       all_pieces,
                                  bitboard       our_pieces,
                                  uint8_t        enemy_king_pos,
@@ -301,8 +281,7 @@ void generate_threats_for_bishop(const Board   &state,
 	}
 }
 
-void generate_threats_for_rook(const Board   &state,
-                               const Piece   &rook,
+void generate_threats_for_rook(const Piece   &rook,
                                bitboard       all_pieces,
                                bitboard       our_pieces,
                                uint8_t        enemy_king_pos,
@@ -331,24 +310,23 @@ threat_boards generate_threat_lines(const Board &state, Color color, const full_
 	threat_boards      threats{};
 	const piece_set_t &our_piece_set   = color == Color::WHITE ? state.black_pieces : state.white_pieces;
 	const piece_set_t &enemy_piece_set = color == Color::WHITE ? state.white_pieces : state.black_pieces;
-	bitboard           our_bb_set      = color == Color::WHITE ? old_boards.black.pieces.all_pieces
+	bitboard           our_bitboards   = color == Color::WHITE ? old_boards.black.pieces.all_pieces
 	                                                           : old_boards.white.pieces.all_pieces;
-	bitboard           enemy_bb_set    = color == Color::WHITE ? old_boards.white.pieces.all_pieces
-	                                                           : old_boards.black.pieces.all_pieces;
+	// bitboard           enemy_bb_set    = color == Color::WHITE ? old_boards.white.pieces.all_pieces
+	//                                                            : old_boards.black.pieces.all_pieces;
 
-	bitboard all_pieces     = our_bb_set | enemy_bb_set;
-	// bitboard enemy_king = enemy_bb_set.kings;
+	bitboard all_pieces     = old_boards.black.pieces.all_pieces | old_boards.white.pieces.all_pieces;
 	uint8_t  enemy_king_pos = enemy_piece_set.kings.front().position();
 
 	for (auto &queen : our_piece_set.queens)
 	{
-		generate_threats_for_rook(state, queen, all_pieces, our_bb_set, enemy_king_pos, threats);
-		generate_threats_for_bishop(state, queen, all_pieces, our_bb_set, enemy_king_pos, threats);
+		generate_threats_for_rook(queen, all_pieces, our_bitboards, enemy_king_pos, threats);
+		generate_threats_for_bishop(queen, all_pieces, our_bitboards, enemy_king_pos, threats);
 	}
 	for (auto &rook : our_piece_set.rooks)
-		generate_threats_for_rook(state, rook, all_pieces, our_bb_set, enemy_king_pos, threats);
+		generate_threats_for_rook(rook, all_pieces, our_bitboards, enemy_king_pos, threats);
 	for (auto &bishop : our_piece_set.bishops)
-		generate_threats_for_bishop(state, bishop, all_pieces, our_bb_set, enemy_king_pos, threats);
+		generate_threats_for_bishop(bishop, all_pieces, our_bitboards, enemy_king_pos, threats);
 	for (auto &knight : our_piece_set.knights)
 		generate_checks_for_knight(knight, enemy_piece_set.kings.front(), threats);
 	for (auto &pawn : our_piece_set.pawns) generate_checks_for_pawn(pawn, enemy_piece_set.kings.front(), threats);
@@ -363,8 +341,10 @@ threat_boards generate_threat_lines(const Board &state, Color color, const full_
 
 #pragma region Sets
 
-single_set generate_bitboard_set(const Board &state, Color color)
+single_set generate_single_set(const Board &state, Color color)
 {
+	const piece_set_t &pieces = color == Color::WHITE ? state.white_pieces : state.black_pieces;
+
 	single_set set = {
 		{
          generate_pawn_board(state, color),
@@ -374,7 +354,7 @@ single_set generate_bitboard_set(const Board &state, Color color)
          generate_queen_board(state, color),
          generate_king_board(state, color),
          bitboard(),
-         generate_piece_visibility(state, color, state.get_bitboards()),
+         generate_piece_visibility(pieces, color, state.get_bitboards()),
 		 },
 		generate_threat_lines(state, color, state.get_bitboards())
 	};
@@ -383,14 +363,14 @@ single_set generate_bitboard_set(const Board &state, Color color)
 	return set;
 }
 
-full_set generate_bitboard_full_set(const Board &state)
+full_set generate_full_set(const Board &state)
 {
 	full_set new_set{};
 	new_set.white.pieces = generate_piece_board(state, Color::WHITE);
 	new_set.black.pieces = generate_piece_board(state, Color::BLACK);
 
-	new_set.white.pieces.visible = generate_piece_visibility(state, Color::WHITE, new_set);
-	new_set.black.pieces.visible = generate_piece_visibility(state, Color::BLACK, new_set);
+	new_set.white.pieces.visible = generate_piece_visibility(state.white_pieces, Color::WHITE, new_set);
+	new_set.black.pieces.visible = generate_piece_visibility(state.black_pieces, Color::BLACK, new_set);
 
 	new_set.white.threats = generate_threat_lines(state, Color::WHITE, new_set);
 	new_set.black.threats = generate_threat_lines(state, Color::BLACK, new_set);

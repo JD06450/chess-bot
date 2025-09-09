@@ -78,7 +78,7 @@ public:
 	void add_piece(Piece piece);
 	void make_move(Move m);
 	void unmake_move();
-	void update_bitboards() { this->bitboards = bitboard::generate_bitboard_full_set(*this); };
+	void update_bitboards() { this->bitboards = bitboard::generate_full_set(*this); };
 
 	Board simulate_move(Move m) const;
 

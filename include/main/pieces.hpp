@@ -3,7 +3,6 @@
 #include <cassert>
 #include <cstdint>
 #include <list>
-#include <stdexcept>
 
 enum class PieceType : uint8_t
 {
