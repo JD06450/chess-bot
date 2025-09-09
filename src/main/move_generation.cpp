@@ -21,10 +21,11 @@ bool is_en_passant_discovered_check(const Board &state, const Piece &pawn, Direc
 	using namespace bitboard;
 	Color enemy_color = invert_color(pawn.get_color());
 
-	const pieces &enemy_pieces = enemy_color == Color::WHITE ? state.bitboards.white.pieces
-	                                                         : state.bitboards.black.pieces;
-	const pieces &our_pieces   = enemy_color == Color::WHITE ? state.bitboards.black.pieces
-	                                                         : state.bitboards.white.pieces;
+	const Color         enemy_color  = invert_color(pawn.get_color());
+	const piece_boards &enemy_pieces = enemy_color == Color::WHITE ? state.bitboards.white.pieces
+	                                                               : state.bitboards.black.pieces;
+	const piece_boards &our_pieces   = enemy_color == Color::WHITE ? state.bitboards.black.pieces
+	                                                               : state.bitboards.white.pieces;
 
 	::bitboard::bitboard all_pieces = state.bitboards.white.pieces.all_pieces | state.bitboards.black.pieces.all_pieces;
 

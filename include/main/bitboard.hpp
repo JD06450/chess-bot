@@ -94,7 +94,7 @@ struct threat_line
 	bool     is_check;
 };
 
-struct pieces
+struct piece_boards
 {
 	bitboard pawns;
 	bitboard knights;
@@ -109,14 +109,14 @@ struct pieces
 
 	void calculate_combined() { all_pieces = pawns | knights | bishops | rooks | queens | kings; }
 
-	bool operator==(const pieces &rhs)
+	bool operator==(const piece_boards &rhs)
 	{
 		return this->pawns == rhs.pawns && this->knights == rhs.knights && this->bishops == rhs.bishops
 		       && this->rooks == rhs.rooks && this->queens == rhs.queens && this->kings == rhs.kings
 		       && this->all_pieces == rhs.all_pieces && this->visible == rhs.visible;
 	}
 
-	bool operator!=(const pieces &rhs)
+	bool operator!=(const piece_boards &rhs)
 	{
 		return this->pawns != rhs.pawns || this->knights != rhs.knights || this->bishops != rhs.bishops
 		       || this->rooks != rhs.rooks || this->queens != rhs.queens || this->kings != rhs.kings
@@ -161,7 +161,7 @@ struct threat_boards
 
 struct single_set
 {
-	pieces        pieces;
+	piece_boards  pieces;
 	threat_boards threats;
 
 	bool operator==(const single_set &rhs) { return this->pieces == rhs.pieces && this->threats == rhs.threats; }
@@ -177,13 +177,13 @@ struct full_set
 	bool operator!=(const full_set &rhs) { return this->white != rhs.white || this->black != rhs.black; }
 };
 
-bitboard generate_pawn_board(const Board &state, Color color);
-bitboard generate_knight_board(const Board &state, Color color);
-bitboard generate_bishop_board(const Board &state, Color color);
-bitboard generate_rook_board(const Board &state, Color color);
-bitboard generate_queen_board(const Board &state, Color color);
-bitboard generate_king_board(const Board &state, Color color);
-pieces   generate_piece_board(const Board &state, Color color);
+bitboard     generate_pawn_board(const Board &state, Color color);
+bitboard     generate_knight_board(const Board &state, Color color);
+bitboard     generate_bishop_board(const Board &state, Color color);
+bitboard     generate_rook_board(const Board &state, Color color);
+bitboard     generate_queen_board(const Board &state, Color color);
+bitboard     generate_king_board(const Board &state, Color color);
+piece_boards generate_piece_board(const Board &state, Color color);
 
 // bitboard generate_pawn_visibility(const Board &state, const Piece &pawn);
 // bitboard generate_knight_visibility(const Piece &knight);

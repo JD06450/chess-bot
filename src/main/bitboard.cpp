@@ -67,9 +67,9 @@ bitboard generate_king_board(const Board &state, Color color)
 	return board;
 }
 
-pieces generate_piece_board(const Board &state, Color color)
+piece_boards generate_piece_board(const Board &state, Color color)
 {
-	pieces pieces = { generate_pawn_board(state, color),   generate_knight_board(state, color),
+	piece_boards pieces = { generate_pawn_board(state, color),   generate_knight_board(state, color),
 		              generate_bishop_board(state, color), generate_rook_board(state, color),
 		              generate_queen_board(state, color),  generate_king_board(state, color) };
 	pieces.calculate_combined();
@@ -165,8 +165,8 @@ bitboard generate_piece_visibility(const piece_set_t &piece_set, Color color, co
 {
 	// const piece_set_t &piece_set = color == Color::WHITE ? state.white_pieces : state.black_pieces;
 
-	const pieces &our_bb_set   = color == Color::WHITE ? old_boards.white.pieces : old_boards.black.pieces;
-	const pieces &enemy_bb_set = color == Color::WHITE ? old_boards.black.pieces : old_boards.white.pieces;
+	const piece_boards &our_bb_set   = color == Color::WHITE ? old_boards.white.pieces : old_boards.black.pieces;
+	const piece_boards &enemy_bb_set = color == Color::WHITE ? old_boards.black.pieces : old_boards.white.pieces;
 
 	bitboard break_board = (our_bb_set.all_pieces | enemy_bb_set.all_pieces) & ~enemy_bb_set.kings;
 	bitboard visibility  = generate_king_visibility(piece_set.kings.front());
