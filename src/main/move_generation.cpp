@@ -16,10 +16,18 @@ std::vector<bitboard::bitboard>::const_iterator get_pin_line(size_t piece_index,
 	return pins.boards.cend();
 }
 
-bool is_en_passant_discovered_check(const Board &state, const Piece &pawn, DirectionOffset offset_to_target)
+// Generates a line from (start, end)
+bitboard::bitboard generate_line(uint8_t start, uint8_t end)
 {
-	using namespace bitboard;
-	Color enemy_color = invert_color(pawn.get_color());
+	if (start == end) return 0;
+	else if (end > start) return (1ULL << end) - (2ULL << start);
+	else return (1ULL << start) - (2ULL << end);
+}
+
+bool is_en_passant_discovered_check(const Board &state, const Piece &pawn, uint8_t target_position)
+{
+	using bitboard::piece_boards;
+	using bitboard::rank_1;
 
 	const Color         enemy_color  = invert_color(pawn.get_color());
 	const piece_boards &enemy_pieces = enemy_color == Color::WHITE ? state.bitboards.white.pieces
@@ -27,44 +35,31 @@ bool is_en_passant_discovered_check(const Board &state, const Piece &pawn, Direc
 	const piece_boards &our_pieces   = enemy_color == Color::WHITE ? state.bitboards.black.pieces
 	                                                               : state.bitboards.white.pieces;
 
-	::bitboard::bitboard all_pieces = state.bitboards.white.pieces.all_pieces | state.bitboards.black.pieces.all_pieces;
+	bitboard::bitboard bits_to_check, all_pieces = our_pieces.all_pieces | enemy_pieces.all_pieces;
 
-	const int file        = get_file_from_square(pawn.position());
-	const int rank        = get_rank_from_square(pawn.position());
+	const int file = get_file_from_square(pawn.position()), rank = get_rank_from_square(pawn.position());
 	const int rank_offset = 8 * rank;
 
 	const uint8_t king_position = std::countr_zero((rank_1 << rank_offset & our_pieces.kings).to_ullong());
 	if (king_position >= 64) return false;
 
-	bool king_on_left = get_file_from_square(king_position) < file;
-
-	::bitboard::bitboard bits_to_check;
+	const bool king_on_left = get_file_from_square(king_position) < file;
 	if (king_on_left) bits_to_check = ((rank_1 << (file + 1)) & rank_1) << rank_offset;
 	else bits_to_check = (rank_1 >> (8 - file)) << rank_offset;
 
 	uint64_t sliders = ((enemy_pieces.rooks | enemy_pieces.queens) & bits_to_check).to_ullong();
 	if (sliders == 0) return false;
 
-	uint8_t enemy_piece_position = king_on_left ? std::countr_zero(sliders) : 63 - std::countl_zero(sliders);
-	int     enemy_file           = get_file_from_square(enemy_piece_position);
-	size_t  max_steps            = king_on_left ? enemy_file : 7 - enemy_file;
-	if (max_steps == 0) return false;
+	uint8_t slider_position = king_on_left ? std::countr_zero(sliders) : 63 - std::countl_zero(sliders);
 
 #ifndef NDEBUG
-	if (state.pieces[enemy_piece_position] == piece_set_t::null_iterator)
+	if (state.pieces[slider_position] == piece_set_t::null_iterator)
 		throw std::runtime_error("En passant check discovered null piece.");
 #endif
 
-	all_pieces.reset(pawn.position()).reset(pawn.position() + (int8_t) get_horizontal(offset_to_target));
-
-	threat_line threat = generate_threat_line(*state.pieces[enemy_piece_position],
-	                                          all_pieces,
-	                                          enemy_pieces.all_pieces & all_pieces,
-	                                          king_position,
-	                                          king_on_left ? DirectionOffset::LEFT : DirectionOffset::RIGHT,
-	                                          max_steps);
-
-	return threat.line.any();
+	all_pieces.reset(pawn.position()) &= ~(bitboard::file_a << get_file_from_square(target_position));
+	bitboard::bitboard slider_to_king = generate_line(king_position, slider_position);
+	return (slider_to_king & all_pieces).none();
 }
 
 #pragma region PAWN_MOVES
@@ -99,8 +94,7 @@ void generate_capture_moves_for_pawn(const Board              &state,
 	}
 
 	int16_t en_passant_square = state.get_en_passant_target();
-	if (en_passant_square != -1 && captures.test(en_passant_square)
-	    && !is_en_passant_discovered_check(state, pawn, (DirectionOffset) (en_passant_square - pawn.position())))
+	if (en_passant_square != -1 && captures.test(en_passant_square) && !is_en_passant_discovered_check(state, pawn, en_passant_square))
 		enemy_pieces.set(en_passant_square);
 
 	captures &= enemy_pieces;

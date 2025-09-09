@@ -188,9 +188,9 @@ void run_all_tests()
 }
 int main()
 {
-	// run_all_tests();
+	run_all_tests();
 
-	setup_debug_dump();
-	run_test(1);
+	// setup_debug_dump();
+	// run_test(1);
 	// Logger::print_color_test();
 }
