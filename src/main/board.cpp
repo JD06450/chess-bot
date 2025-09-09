@@ -247,7 +247,7 @@ void Board::_handle_castling_rights(Move                       &m,
 	Color           c            = this->turn_to_move();
 	CastlingRights &our_rights   = c == Color::WHITE ? this->white_castling_rights : this->black_castling_rights;
 	CastlingRights &enemy_rights = c == Color::WHITE ? this->black_castling_rights : this->white_castling_rights;
-	const rook_positions_t &our_test_positions = c == Color::WHITE ? white_positions : black_positions;
+	const rook_positions_t &our_test_positions   = c == Color::WHITE ? white_positions : black_positions;
 	const rook_positions_t &enemy_test_positions = c == Color::WHITE ? black_positions : white_positions;
 
 	bool rook_captured = target_piece != piece_set_t::null_iterator && *target_piece == PieceType::ROOK;
@@ -449,10 +449,13 @@ void Board::make_move(Move m)
 	if (m.is_capture() || m.is_promotion() || *to_piece == PieceType::PAWN) this->fifty_move_clock = 0;
 	else this->fifty_move_clock++;
 
-	set.pieces.visible       = bitboard::generate_piece_visibility(*this, current_color, this->bitboards);
-	other_set.pieces.visible = bitboard::generate_piece_visibility(*this, other_color, this->bitboards);
-	set.threats             = bitboard::generate_threat_lines(*this, current_color, this->bitboards);
-	other_set.threats       = bitboard::generate_threat_lines(*this, other_color, this->bitboards);
+	const piece_set_t &current_pieces = current_color == Color::WHITE ? this->white_pieces : this->black_pieces;
+	const piece_set_t &enemy_pieces   = other_color == Color::WHITE ? this->white_pieces : this->black_pieces;
+
+	set.pieces.visible       = bitboard::generate_piece_visibility(current_pieces, current_color, this->bitboards);
+	other_set.pieces.visible = bitboard::generate_piece_visibility(enemy_pieces, other_color, this->bitboards);
+	set.threats              = bitboard::generate_threat_lines(*this, current_color, this->bitboards);
+	other_set.threats        = bitboard::generate_threat_lines(*this, other_color, this->bitboards);
 	this->_in_check          = in_check(this);
 }
 
@@ -495,10 +498,13 @@ void Board::unmake_move()
 	                      || last_move.get_flags() == move_flags::QUEENSIDE_CASTLE;
 	if (is_castle_move) _handle_undo_castling(last_move, last_move.get_flags() == move_flags::KINGSIDE_CASTLE);
 
-	set.pieces.visible       = bitboard::generate_piece_visibility(*this, current_color, this->bitboards);
-	other_set.pieces.visible = bitboard::generate_piece_visibility(*this, other_color, this->bitboards);
-	set.threats             = bitboard::generate_threat_lines(*this, current_color, this->bitboards);
-	other_set.threats       = bitboard::generate_threat_lines(*this, other_color, this->bitboards);
+	const piece_set_t &current_pieces = current_color == Color::WHITE ? this->white_pieces : this->black_pieces;
+	const piece_set_t &enemy_pieces   = other_color == Color::WHITE ? this->white_pieces : this->black_pieces;
+
+	set.pieces.visible       = bitboard::generate_piece_visibility(current_pieces, current_color, this->bitboards);
+	other_set.pieces.visible = bitboard::generate_piece_visibility(enemy_pieces, other_color, this->bitboards);
+	set.threats              = bitboard::generate_threat_lines(*this, current_color, this->bitboards);
+	other_set.threats        = bitboard::generate_threat_lines(*this, other_color, this->bitboards);
 	this->_in_check          = in_check(this);
 }
 
