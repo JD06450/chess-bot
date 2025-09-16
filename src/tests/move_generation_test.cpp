@@ -20,7 +20,7 @@
 constexpr int ply = 4;
 void          add_to_debug_dump(const Board &start, const std::vector<Move> &moves);
 
-Logger *mg_logger = new Logger(LOG_LEVEL::DEBUG, "", Logger::HeaderType::NONE);
+Logger *mg_logger = new Logger(LOG_LEVEL::DEBUG, "", Logger::HeaderType::SHORT);
 
 uint64_t get_num_positions(Board &board, int depth, bool log)
 {
