@@ -4,8 +4,6 @@
 #include <sstream>
 #include <stdexcept>
 
-Move::Move() noexcept { this->_move.raw = 0; }
-
 Move::Move(uint16_t from, uint16_t to, uint16_t flags)
 {
 	this->_move.bits.from         = from;

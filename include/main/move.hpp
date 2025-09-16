@@ -169,38 +169,38 @@ private:
 	} _move;
 
 public:
-	Move() noexcept;
-	Move(const Move &m) = default;
+	constexpr Move() noexcept { this->_move.raw = 0; };
+	constexpr Move(const Move &m) = default;
 	Move(uint16_t from, uint16_t to, uint16_t flags = move_flags::QUIET_MOVE);
 	Move(const std::string &from, const std::string &to, uint16_t flags = move_flags::QUIET_MOVE);
 
-	uint16_t get_from() const { return _move.bits.from; }
-	uint16_t get_to() const { return _move.bits.to; }
+	constexpr uint16_t get_from() const noexcept { return _move.bits.from; }
+	constexpr uint16_t get_to() const noexcept { return _move.bits.to; }
 	// SpecialFlag get_special() const { return _move.bits.special; }
-	uint16_t get_flags() const { return _move.bits.flags; }
-	uint16_t get_special() const { return _move.bits.flags & 0b11; }
-	bool     is_promotion() const { return _move.bits.flags & move_flags::PROMOTION; }
-	bool     is_capture() const { return _move.bits.flags & move_flags::CAPTURE; }
+	constexpr uint16_t get_flags() const noexcept { return _move.bits.flags; }
+	constexpr uint16_t get_special() const noexcept { return _move.bits.flags & 0b11; }
+	constexpr bool     is_promotion() const noexcept { return _move.bits.flags & move_flags::PROMOTION; }
+	constexpr bool     is_capture() const noexcept { return _move.bits.flags & move_flags::CAPTURE; }
 
-	bool operator==(const Move &rhs) { return this->_move.raw == rhs._move.raw; }
-	bool operator!=(const Move &rhs) { return this->_move.raw != rhs._move.raw; }
+	constexpr bool operator==(const Move &rhs) const noexcept { return this->_move.raw == rhs._move.raw; }
+	constexpr bool operator!=(const Move &rhs) const noexcept { return this->_move.raw != rhs._move.raw; }
 
-	void set_from(uint16_t from) { _move.bits.from = from; }
-	void set_to(uint16_t to) { _move.bits.to = to; }
+	constexpr void set_from(uint16_t from) noexcept { _move.bits.from = from; }
+	constexpr void set_to(uint16_t to) noexcept { _move.bits.to = to; }
 	// void set_special(SpecialFlag special) { _move.bits.special = special; }
-	void set_promotion(bool p)
+	constexpr void set_promotion(bool p) noexcept
 	{
 		if (p) _move.bits.flags |= move_flags::PROMOTION;
 		else _move.bits.flags &= 0b1111 ^ move_flags::PROMOTION;
 	}
-	void set_capture(bool c)
+	constexpr void set_capture(bool c) noexcept
 	{
 		if (c) _move.bits.flags |= move_flags::CAPTURE;
 		else _move.bits.flags &= 0b1111 ^ move_flags::CAPTURE;
 	}
 
-	bool empty() const { return _move.raw == 0; }
-	bool is_none() const { return this->empty(); }
+	constexpr bool empty() const noexcept { return _move.raw == 0; }
+	constexpr bool is_none() const noexcept { return this->empty(); }
 
 	std::string to_string(const Board &state, bool short_version = false) const;
 };
