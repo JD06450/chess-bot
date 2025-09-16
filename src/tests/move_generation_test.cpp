@@ -20,7 +20,7 @@
 constexpr int ply = 4;
 void          add_to_debug_dump(const Board &start, const std::vector<Move> &moves);
 
-Logger *logger = new Logger(LOG_LEVEL::DEBUG, "", Logger::HeaderType::NONE);
+Logger *mg_logger = new Logger(LOG_LEVEL::DEBUG, "", Logger::HeaderType::NONE);
 
 uint64_t get_num_positions(Board &board, int depth, bool log)
 {
@@ -57,13 +57,13 @@ std::array<size_t, ply> performance_test(Board &start)
 		// uint64_t                positions = get_num_positions(start, i, i == ply);
 		uint64_t                positions = get_num_positions(start, i, false);
 		auto                    end       = std::chrono::duration_cast<std::chrono::milliseconds>(Clock::now() - begin);
-		logger->print(LOG_LEVEL::INFO, "Depth: ");
-		logger->print(LOG_LEVEL::INFO, std::to_string(i) + " ply   ", TEXT_COLOR::BLUE);
-		logger->print(LOG_LEVEL::INFO, "Result: ");
-		logger->print(LOG_LEVEL::INFO, std::to_string(positions) + " positions   ", TEXT_COLOR::PURPLE);
-		logger->print(LOG_LEVEL::INFO, "Time: ");
-		logger->print(LOG_LEVEL::INFO, std::to_string(end.count()) + "ms", TEXT_COLOR::LIGHT_GREEN);
-		logger->println(LOG_LEVEL::INFO, "");
+		mg_logger->print(LOG_LEVEL::INFO, "Depth: ");
+		mg_logger->print(LOG_LEVEL::INFO, std::to_string(i) + " ply   ", TEXT_COLOR::BLUE);
+		mg_logger->print(LOG_LEVEL::INFO, "Result: ");
+		mg_logger->print(LOG_LEVEL::INFO, std::to_string(positions) + " positions   ", TEXT_COLOR::PURPLE);
+		mg_logger->print(LOG_LEVEL::INFO, "Time: ");
+		mg_logger->print(LOG_LEVEL::INFO, std::to_string(end.count()) + "ms", TEXT_COLOR::LIGHT_GREEN);
+		mg_logger->println(LOG_LEVEL::INFO, "");
 		// printf("Depth: %i ply   Result: %lu positions   Time: %lims\n", i, positions, end.count());
 		results[i - 1] = positions;
 	}
@@ -111,7 +111,7 @@ void add_to_debug_dump(const Board &start, const std::vector<Move> &moves)
 void run_test(size_t test_index)
 {
 	// std::cout << "Testing position " << (test_index + 1) << '\n';
-	logger->println(LOG_LEVEL::DEBUG,
+	mg_logger->println(LOG_LEVEL::DEBUG,
 	                std::string("Testing position ") + std::to_string(test_index + 1),
 	                TEXT_COLOR::NORMAL,
 	                true);
@@ -120,9 +120,9 @@ void run_test(size_t test_index)
 	{
 		std::cout << "Test failed: Failed to generate board.\n";
 
-		logger->print(LOG_LEVEL::ERROR, "Test ", TEXT_COLOR::NORMAL, true);
-		logger->print(LOG_LEVEL::ERROR, "failed", TEXT_COLOR::RED, true);
-		logger->println(LOG_LEVEL::ERROR, ": Failed to generate board.");
+		mg_logger->print(LOG_LEVEL::ERROR, "Test ", TEXT_COLOR::NORMAL, true);
+		mg_logger->print(LOG_LEVEL::ERROR, "failed", TEXT_COLOR::RED, true);
+		mg_logger->println(LOG_LEVEL::ERROR, ": Failed to generate board.");
 		return;
 	}
 	Board start = result.value();
@@ -139,10 +139,10 @@ void run_test(size_t test_index)
 	}
 	catch (const std::exception &e)
 	{
-		logger->print(LOG_LEVEL::ERROR, "Test ", TEXT_COLOR::NORMAL, true);
-		logger->print(LOG_LEVEL::ERROR, "failed", TEXT_COLOR::RED, true);
-		logger->print(LOG_LEVEL::ERROR, ": Exception thrown.\n");
-		logger->println(LOG_LEVEL::ERROR, e.what());
+		mg_logger->print(LOG_LEVEL::ERROR, "Test ", TEXT_COLOR::NORMAL, true);
+		mg_logger->print(LOG_LEVEL::ERROR, "failed", TEXT_COLOR::RED, true);
+		mg_logger->print(LOG_LEVEL::ERROR, ": Exception thrown.\n");
+		mg_logger->println(LOG_LEVEL::ERROR, e.what());
 
 		return;
 	}
@@ -153,18 +153,18 @@ void run_test(size_t test_index)
 		if (test_results[j] == num_positions[test_index][j]) continue;
 
 		// std::cout << "Test failed: Node counts mismatch.\n";
-		logger->print(LOG_LEVEL::ERROR, "Test ", TEXT_COLOR::NORMAL, true);
-		logger->print(LOG_LEVEL::ERROR, "failed", TEXT_COLOR::RED, true);
-		logger->println(LOG_LEVEL::ERROR, ": Node counts mismatch at ply " + std::to_string(j + 1));
+		mg_logger->print(LOG_LEVEL::ERROR, "Test ", TEXT_COLOR::NORMAL, true);
+		mg_logger->print(LOG_LEVEL::ERROR, "failed", TEXT_COLOR::RED, true);
+		mg_logger->println(LOG_LEVEL::ERROR, ": Node counts mismatch at ply " + std::to_string(j + 1));
 		failed = true;
 		break;
 	}
 
 	if (!failed)
 	{
-		logger->print(LOG_LEVEL::INFO, "Test ", TEXT_COLOR::NORMAL, true);
-		logger->print(LOG_LEVEL::INFO, "Passed", TEXT_COLOR::LIGHT_GREEN, true);
-		logger->println(LOG_LEVEL::INFO, "!", TEXT_COLOR::NORMAL, true);
+		mg_logger->print(LOG_LEVEL::INFO, "Test ", TEXT_COLOR::NORMAL, true);
+		mg_logger->print(LOG_LEVEL::INFO, "Passed", TEXT_COLOR::LIGHT_GREEN, true);
+		mg_logger->println(LOG_LEVEL::INFO, "!", TEXT_COLOR::NORMAL, true);
 	}
 }
 void run_all_tests()

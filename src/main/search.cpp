@@ -1,13 +1,14 @@
 #include "search.hpp"
 
 #include "board.hpp"
-#include "hc_evaluation.hpp"
 #include "move_generation.hpp"
 
+#include <chrono>
 #include <limits>
-#include <numeric>
 
 using evaluation::eval_t;
+using Clock = std::chrono::steady_clock;
+using namespace std::chrono_literals;
 
 eval_t negamax(Board &&board, uint32_t depth)
 {
@@ -27,24 +28,26 @@ eval_t negamax(Board &&board, uint32_t depth)
 	return max;
 }
 
-Move get_best_move(const Board &board, uint32_t depth)
+search_result get_best_move(const Board &board, uint32_t depth, std::chrono::milliseconds max_time)
 {
+	search_result result{ 0ms, std::numeric_limits<eval_t>::min(), Move{} };
 	std::vector<Move> legal_moves = generate_moves(board);
-
-	Move   best_move{};
-	eval_t best_score = 0;
-
 	Board board_copy = board;
+	std::chrono::steady_clock::time_point start = Clock::now(), end;
 
 	for (auto &move : legal_moves)
 	{
 		eval_t score = -negamax(board.simulate_move(move), depth - 1);
-		if (score > best_score)
+		if (score > result.score)
 		{
-			best_score = score;
-			best_move  = move;
+			result.score = score;
+			result.move = move;
 		}
+
+		end = Clock::now();
+		if (max_time != 0ms && end - start > max_time) break;
 	}
 
-	return best_move;
+	result.search_time = std::chrono::duration_cast<std::chrono::milliseconds>(end - start + 500us);
+	return result;
 }
