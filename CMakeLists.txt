@@ -36,12 +36,12 @@ file(GLOB_RECURSE source_tests src/tests/*.cpp)
 
 add_executable(bot ${sources})
 
-target_include_directories(bot PRIVATE include/main)
+target_include_directories(bot PRIVATE include/main PRIVATE cxxopts/include)
 target_link_libraries(bot PRIVATE tbb)
 
 list(REMOVE_ITEM sources "${CMAKE_SOURCE_DIR}/src/main/main.cpp")
 
 add_executable(bot_tests ${source_tests} ${sources})
 
-target_include_directories(bot_tests PRIVATE include/tests PRIVATE include/main)
+target_include_directories(bot_tests PRIVATE include/tests PRIVATE include/main PRIVATE cxxopts/include)
 target_link_libraries(bot_tests PRIVATE tbb)
