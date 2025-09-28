@@ -158,22 +158,19 @@ struct single_set
 	bool operator!=(const single_set &rhs) { return this->pieces != rhs.pieces || this->threats != rhs.threats; }
 };
 
-struct full_set
-{
-	single_set white;
-	single_set black;
+// struct full_set
+// {
+// 	single_set white;
+// 	single_set black;
 
-	bool operator==(const full_set &rhs) { return this->white == rhs.white && this->black == rhs.black; }
-	bool operator!=(const full_set &rhs) { return this->white != rhs.white || this->black != rhs.black; }
-};
+// 	bool operator==(const full_set &rhs) { return this->white == rhs.white && this->black == rhs.black; }
+// 	bool operator!=(const full_set &rhs) { return this->white != rhs.white || this->black != rhs.black; }
+// };
 
-bitboard     generate_pawn_board(const Board &state, Color color);
-bitboard     generate_knight_board(const Board &state, Color color);
-bitboard     generate_bishop_board(const Board &state, Color color);
-bitboard     generate_rook_board(const Board &state, Color color);
-bitboard     generate_queen_board(const Board &state, Color color);
-bitboard     generate_king_board(const Board &state, Color color);
-piece_boards generate_piece_board(const Board &state, Color color);
+typedef std::array<single_set, 2> full_set;
+
+bitboard generate_piece_board(const piece_set_t::PieceList &list);
+piece_boards generate_piece_boards(const Board &state, color_t color);
 
 // bitboard generate_pawn_visibility(const Board &state, const Piece &pawn);
 // bitboard generate_knight_visibility(const Piece &knight);
@@ -182,7 +179,7 @@ piece_boards generate_piece_board(const Board &state, Color color);
 // bitboard generate_queen_visibility(const Board &state, const Piece &queen);
 // bitboard generate_king_visibility(const Board &state, const Piece &king);
 
-bitboard generate_piece_visibility(const piece_set_t &piece_set, Color color, const full_set &old_boards);
+bitboard generate_piece_visibility(const piece_set_t &piece_set, color_t color, const full_set &old_boards);
 
 threat_line generate_threat_line(const Piece    &piece,
                                  bitboard        all_pieces,
@@ -191,9 +188,9 @@ threat_line generate_threat_line(const Piece    &piece,
                                  DirectionOffset direction,
                                  size_t          max_steps);
 
-threat_boards generate_threat_lines(const Board &state, Color color, const full_set &old_boards);
+threat_boards generate_threat_lines(const Board &state, color_t color, const full_set &old_boards);
 
-single_set generate_single_set(const Board &state, Color color);
+single_set generate_single_set(const Board &state, color_t color);
 full_set   generate_full_set(const Board &state);
 
 std::string to_string(bitboard bb);

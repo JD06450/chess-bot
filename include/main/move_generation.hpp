@@ -2,8 +2,8 @@
 
 #include <algorithm>
 #include <array>
-#include <vector>
 #include <cstddef>
+#include <vector>
 
 #include "bitboard.hpp"
 #include "move.hpp"
@@ -45,30 +45,6 @@ static consteval std::array<std::array<size_t, 8>, 64> _precompute_squares_to_ed
 
 constexpr std::array<std::array<size_t, 8>, 64> NUM_SQUARES_TO_EDGE = _precompute_squares_to_edge();
 
-static consteval std::array<std::array<bitboard::bitboard, 2>, 64> _precompute_pawn_squares(DirectionOffset push,
-                                                                                            int double_push_rank)
-{
-	std::array<std::array<bitboard::bitboard, 2>, 64> moves{};
-
-	for (int from_square = 0; from_square < moves.size(); from_square++)
-	{
-		uint16_t to        = from_square + (int) push;
-		uint16_t double_to = to + (int) push;
-
-		bool push_valid        = inside_board(to);
-		bool double_push_valid = push_valid && get_rank_from_square(from_square) == double_push_rank;
-
-		// Minor optimization. Don't need to check color of pawn since a white pawn can't be pushed to the first rank,
-		// and a black pawn can't be pushed to the eighth rank.
-		// bool is_promotion = (get_rank_from_square(to) == 7) || (get_rank_from_square(to) == 0);
-
-		if (push_valid) moves[from_square][0].set(to);
-		if (double_push_valid) moves[from_square][1].set(double_to);
-	}
-
-	return moves;
-}
-
 static consteval std::array<bitboard::bitboard, 64> _precompute_pawn_captures(DirectionOffset left,
                                                                               DirectionOffset right)
 {
@@ -93,17 +69,13 @@ static consteval std::array<bitboard::bitboard, 64> _precompute_pawn_captures(Di
 	return captures;
 }
 
-constexpr std::array<std::array<bitboard::bitboard, 2>, 64> WHITE_PAWN_MOVES = _precompute_pawn_squares(
-    DirectionOffset::UP,
-    1);
-constexpr std::array<bitboard::bitboard, 64> WHITE_PAWN_CAPTURES = _precompute_pawn_captures(DirectionOffset::UP_LEFT,
-                                                                                             DirectionOffset::UP_RIGHT);
-constexpr std::array<std::array<bitboard::bitboard, 2>, 64> BLACK_PAWN_MOVES = _precompute_pawn_squares(
-    DirectionOffset::DOWN,
-    6);
-constexpr std::array<bitboard::bitboard, 64> BLACK_PAWN_CAPTURES = _precompute_pawn_captures(
-    DirectionOffset::DOWN_LEFT,
-    DirectionOffset::DOWN_RIGHT);
+constexpr std::array<DirectionOffset, 2> PAWN_MOVE_OFFSETS = { DirectionOffset::UP, DirectionOffset::DOWN };
+constexpr std::array<uint8_t, 2>         PAWN_DOUBLE_MOVE_RANKS = { 1, 6 };
+
+constexpr std::array<std::array<bitboard::bitboard, 64>, 2> PAWN_CAPTURES = {
+	_precompute_pawn_captures(DirectionOffset::UP_LEFT, DirectionOffset::UP_RIGHT),
+	_precompute_pawn_captures(DirectionOffset::DOWN_LEFT, DirectionOffset::DOWN_RIGHT)
+};
 
 static consteval std::array<bitboard::bitboard, 64> _precompute_knight_squares()
 {

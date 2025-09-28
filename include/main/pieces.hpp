@@ -16,14 +16,11 @@ enum class PieceType : uint8_t
 	MAX_TYPE = 7
 };
 
-enum class Color : uint8_t
-{
-	WHITE = 0,
-	BLACK = 1,
+typedef uint8_t   color_t;
+constexpr color_t WHITE = 0;
+constexpr color_t BLACK = 1;
 
-};
-
-inline constexpr Color invert_color(Color c) { return c == Color::WHITE ? Color::BLACK : Color::WHITE; }
+inline constexpr color_t invert_color(color_t c) { return !c; }
 
 class Piece
 {
@@ -31,7 +28,7 @@ private:
 	struct
 	{
 		PieceType type  : 3;
-		Color     color : 1;
+		color_t   color : 1;
 	} piece;
 	uint8_t _position = 0;
 
@@ -46,14 +43,14 @@ public:
 	}
 
 	constexpr Piece() noexcept : piece(PieceType::NONE) {}
-	constexpr Piece(PieceType type, Color color = Color::WHITE) noexcept
+	constexpr Piece(PieceType type, color_t color = WHITE) noexcept
 	{
 		this->piece.type  = type;
 		this->piece.color = color;
 		this->_position   = 0;
 	}
 
-	constexpr Piece(PieceType type, Color color, uint8_t pos)
+	constexpr Piece(PieceType type, color_t color, uint8_t pos)
 	{
 		this->piece.type  = type;
 		this->piece.color = color;
@@ -65,11 +62,11 @@ public:
 	constexpr Piece &operator=(const Piece &p) = default;
 	// Piece &operator=(const Piece &&p) = default;
 
-	constexpr operator bool() const { return !this->empty(); }
+	constexpr      operator bool() const { return !this->empty(); }
 	constexpr bool operator==(const PieceType &p) const noexcept { return this->piece.type == p; }
 	constexpr bool operator!=(const PieceType &p) const noexcept { return this->piece.type != p; }
-	constexpr bool operator==(const Color &c) const noexcept { return this->piece.color == c; }
-	constexpr bool operator!=(const Color &c) const noexcept { return this->piece.color != c; }
+	constexpr bool operator==(const color_t &c) const noexcept { return this->piece.color == c; }
+	constexpr bool operator!=(const color_t &c) const noexcept { return this->piece.color != c; }
 
 	constexpr bool operator==(const Piece &p) const noexcept
 	{
@@ -86,13 +83,13 @@ public:
 
 	constexpr void clear() noexcept
 	{
-		this->set_color(Color::WHITE);
+		this->set_color(WHITE);
 		this->set_piece(PieceType::NONE);
 	}
 
-	constexpr Color     get_color() const noexcept { return this->piece.color; }
+	constexpr color_t   get_color() const noexcept { return this->piece.color; }
 	constexpr PieceType get_type() const noexcept { return this->piece.type; }
-	constexpr void      set_color(Color c) noexcept { this->piece.color = c; }
+	constexpr void      set_color(color_t c) noexcept { this->piece.color = c; }
 	constexpr void      set_piece(PieceType p) noexcept { this->piece.type = p; }
 
 	void promote_piece(PromotionOptions id);
@@ -102,19 +99,21 @@ public:
 
 struct piece_set_t
 {
-	typedef std::list<Piece>::iterator       iterator;
-	typedef std::list<Piece>::const_iterator const_iterator;
+	typedef std::list<Piece> PieceList;
+
+	typedef PieceList::iterator       iterator;
+	typedef PieceList::const_iterator const_iterator;
 
 	static const iterator null_iterator;
 
 	// We don't really need to store multiple kings,
 	// but this does make things easier.
-	typedef std::list<Piece> KingList;
-	typedef std::list<Piece> QueenList;
-	typedef std::list<Piece> RookList;
-	typedef std::list<Piece> BishopList;
-	typedef std::list<Piece> KnightList;
-	typedef std::list<Piece> PawnList;
+	typedef PieceList KingList;
+	typedef PieceList QueenList;
+	typedef PieceList RookList;
+	typedef PieceList BishopList;
+	typedef PieceList KnightList;
+	typedef PieceList PawnList;
 
 	KingList   kings;
 	QueenList  queens;

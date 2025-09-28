@@ -25,8 +25,8 @@ namespace evaluation::hce
 
 eval_t two_phase_lerp(const Board &state, eval_t mg, eval_t eg)
 {
-	const bitboard::piece_boards &white_bits = state.bitboards.white.pieces;
-	const bitboard::piece_boards &black_bits = state.bitboards.black.pieces;
+	const bitboard::piece_boards &white_bits = state.bitboards[WHITE].pieces;
+	const bitboard::piece_boards &black_bits = state.bitboards[BLACK].pieces;
 
 	eval_t phase  = phase_values::MAX_PIECES;
 	phase        -= (white_bits.knights | black_bits.knights).count();
@@ -40,8 +40,8 @@ eval_t two_phase_lerp(const Board &state, eval_t mg, eval_t eg)
 
 eval_t four_phase_lerp(const Board &state, eval_t p1, eval_t p2, eval_t p3, eval_t p4)
 {
-	const bitboard::piece_boards &white_bits = state.bitboards.white.pieces;
-	const bitboard::piece_boards &black_bits = state.bitboards.black.pieces;
+	const bitboard::piece_boards &white_bits = state.bitboards[WHITE].pieces;
+	const bitboard::piece_boards &black_bits = state.bitboards[BLACK].pieces;
 
 	eval_t piece_phase  = phase_values::MAX_PIECES;
 	eval_t pawn_phase   = phase_values::MAX_PAWNS;
@@ -65,21 +65,21 @@ eval_t evaluate(const Board &state)
 {
 	eval_t white_piece_eval = 0, black_piece_eval = 0;
 	// Start off with simple piece evaluation
-	white_piece_eval += state.white_pieces.queens.size() * piece_values::QUEEN_MID;
-	white_piece_eval += state.white_pieces.rooks.size() * piece_values::ROOK_MID;
-	white_piece_eval += state.white_pieces.bishops.size() * piece_values::BISHOP_MID;
-	white_piece_eval += state.white_pieces.knights.size() * piece_values::KNIGHT_MID;
-	white_piece_eval += state.white_pieces.pawns.size() * piece_values::PAWN_MID;
+	white_piece_eval += state.pieces[WHITE].queens.size() * piece_values::QUEEN_MID;
+	white_piece_eval += state.pieces[WHITE].rooks.size() * piece_values::ROOK_MID;
+	white_piece_eval += state.pieces[WHITE].bishops.size() * piece_values::BISHOP_MID;
+	white_piece_eval += state.pieces[WHITE].knights.size() * piece_values::KNIGHT_MID;
+	white_piece_eval += state.pieces[WHITE].pawns.size() * piece_values::PAWN_MID;
 
-	black_piece_eval += state.black_pieces.queens.size() * piece_values::QUEEN_MID;
-	black_piece_eval += state.black_pieces.rooks.size() * piece_values::ROOK_MID;
-	black_piece_eval += state.black_pieces.bishops.size() * piece_values::BISHOP_MID;
-	black_piece_eval += state.black_pieces.knights.size() * piece_values::KNIGHT_MID;
-	black_piece_eval += state.black_pieces.pawns.size() * piece_values::PAWN_MID;
+	black_piece_eval += state.pieces[BLACK].queens.size() * piece_values::QUEEN_MID;
+	black_piece_eval += state.pieces[BLACK].rooks.size() * piece_values::ROOK_MID;
+	black_piece_eval += state.pieces[BLACK].bishops.size() * piece_values::BISHOP_MID;
+	black_piece_eval += state.pieces[BLACK].knights.size() * piece_values::KNIGHT_MID;
+	black_piece_eval += state.pieces[BLACK].pawns.size() * piece_values::PAWN_MID;
 
 	eval_t total_piece_eval = white_piece_eval - black_piece_eval;
 
-	if (state.turn_to_move() == Color::BLACK) total_piece_eval *= -1;
+	if (state.turn_to_move() == BLACK) total_piece_eval *= -1;
 	return total_piece_eval;
 }
 

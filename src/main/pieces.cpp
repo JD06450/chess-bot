@@ -29,7 +29,7 @@ char Piece::to_string() const
 		return '\0';
 	}
 
-	if (this->piece.color == Color::WHITE) piece_string -= 32;
+	if (this->piece.color == WHITE) piece_string -= 32;
 
 	return piece_string;
 }
